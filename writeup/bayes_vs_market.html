@@ -1,0 +1,718 @@
+<title>Bayes vs the Market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#F6F7F9; --surface:#FFFFFF; --raise:#EDF0F4; --ink:#0B0F17; --ink2:#2A3240; --line:#C9D0DA; --grid:#DCE1E8;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --bench:#0B0F17; --hl:#FFF1D6; --hl-line:#D9A441;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif; --body:"Source Sans 3","Helvetica Neue",Arial,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1117; --surface:#161B23; --raise:#1E2530; --ink:#F2F4F7; --ink2:#D5DBE3; --line:#3A4452; --grid:#2A323E;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --bench:#F2F4F7; --hl:#2B2312; --hl-line:#8F6B28; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1117; --surface:#161B23; --raise:#1E2530; --ink:#F2F4F7; --ink2:#D5DBE3; --line:#3A4452; --grid:#2A323E;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --bench:#F2F4F7; --hl:#2B2312; --hl-line:#8F6B28; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:780px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+header{padding-block:40px 8px}
+.kicker{font:600 .82rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--s2)}
+h1{font-size:clamp(2rem,6vw,3rem);font-weight:800;line-height:1.05;letter-spacing:-.02em;margin-top:6px}
+.dek{font-size:1.15rem;color:var(--ink2);margin:12px 0 0;max-width:60ch}
+.draft{display:inline-block;margin-top:14px;font:600 .8rem var(--mono);border:1.5px dashed var(--hl-line);background:var(--hl);border-radius:6px;padding:4px 10px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:26px 0 8px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.tile b{display:block;font:800 1.9rem var(--display);line-height:1.1}
+.tile span{font-size:.92rem;color:var(--ink2)}
+section{padding-top:38px}
+h2{font-size:1.5rem;font-weight:800;margin-bottom:10px}
+p{margin:0 0 12px;max-width:66ch}
+ol.steps{margin:0 0 12px;padding-left:1.3em;max-width:66ch}
+ol.steps li{margin-bottom:6px}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}
+.fig h3{font-size:1.02rem;font-weight:800;margin-bottom:2px}
+.fig .sub{font-size:.92rem;color:var(--ink2);margin:0 0 10px}
+.scroll{overflow-x:auto}
+svg.ch{display:block;width:100%;min-width:520px;height:auto}
+svg.ch text{fill:var(--ink);font-family:var(--body);font-size:13px}
+svg.ch .muted{fill:var(--ink2)}
+svg.ch .num{font-family:var(--mono);font-size:12px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.9rem;margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+details.tbl{margin-top:10px}
+details.tbl summary{cursor:pointer;font-weight:600;font-size:.9rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin-top:8px}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+td.n,th.n{text-align:right;font-family:var(--mono);font-size:.85rem}
+.note{background:var(--hl);border:1px solid var(--hl-line);border-radius:10px;padding:12px 14px;margin:14px 0;max-width:66ch}
+.toggle{display:inline-flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:8px}
+.toggle button{font:600 .88rem var(--body);background:var(--surface);color:var(--ink);border:0;padding:6px 14px;cursor:pointer}
+.toggle button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:.85rem;padding:6px 9px;border-radius:6px;opacity:0;transition:opacity .1s;max-width:260px;z-index:9}
+footer{margin-top:44px;font-size:.92rem;color:var(--ink2)}
+:focus-visible{outline:3px solid var(--s1);outline-offset:2px}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="kicker">Football modelling · Bayesian inference</div>
+  <h1>Bayes vs the Market</h1>
+  <p class="dek">Does a hierarchical Bayesian goal model, fitted with MCMC, beat a classical Dixon-Coles model at forecasting Premier League matches? And can a tabular foundation model beat both? Tested walk-forward on five seasons against the closing betting market.</p>
+  <span class="draft">DRAFT for review, not published</span>
+  <div class="tiles" id="tiles"></div>
+</header>
+
+<section>
+  <h2>The question</h2>
+  <p>The closing price in a liquid betting market is one of the best football forecasts there is, so it is the right benchmark. I built two goal models with identical structure and fitted them two ways, then added a tabular foundation model as a third approach:</p>
+  <ol class="steps">
+    <li><b>Classical (maximum likelihood):</b> team attack and defence ratings, home advantage, the Dixon-Coles low-score correction and a shared effect for promoted sides, with older matches down-weighted.</li>
+    <li><b>Bayesian (hierarchical, MCMC):</b> the same model, but team strengths share a learned spread, so a team with little data is pulled towards the league and its uncertainty is carried into every forecast. Sampled with NUTS in NumPyro.</li>
+    <li><b>TabICL (tabular foundation model):</b> a pre-trained model that predicts from a table in one forward pass with no training or tuning. Given the two models' forecasts, then also the market's.</li>
+  </ol>
+  <p>Every forecast uses only matches played before it: each model is refit every 28 days on the previous three years and scored on the next 28 days, across 2021-22 to 2025-26.</p>
+</section>
+
+<section>
+  <h2>Result: nobody beats the market</h2>
+  <p>Scored by log loss (lower is better) on the same 1,520 matches from 2022-23 to 2025-26. The chart shows how far each forecaster is behind the closing market, with a 95% bootstrap interval.</p>
+  <div class="fig">
+    <h3>Gap to the closing market in log loss per match</h3>
+    <p class="sub">0 = as good as the market. Further right = worse. Hover a dot for the numbers.</p>
+    <div class="scroll"><svg class="ch" id="ch-gap" role="img" aria-label="Log loss gap to the market by forecaster"></svg></div>
+    <details class="tbl"><summary>Show as a table</summary><table id="t-gap"></table></details>
+  </div>
+  <p>The classical and Bayesian models finish level, about 0.023 behind the market. TabICL on the models' forecasts does no better than the models themselves. Given the market as well, it gets much closer but is still measurably worse than the market alone. It adds noise, not information.</p>
+</section>
+
+<section>
+  <h2>The interesting part: my first Bayesian model lost</h2>
+  <p>The first Bayesian run scored worse than the classical model, and clearly worse early in each season. The diagnosis was its forecasts were too cautious: its home-win probabilities barely varied between a mismatch and an even game.</p>
+  <div class="fig">
+    <h3>How decisive each forecaster is</h3>
+    <p class="sub">Spread (standard deviation) of the home-win probability across all matches. The market is the reference line.</p>
+    <div class="scroll"><svg class="ch" id="ch-sharp" role="img" aria-label="Spread of home win probabilities by forecaster"></svg></div>
+  </div>
+  <ol class="steps">
+    <li><b>Cause:</b> down-weighting old matches is standard, but in a Bayesian model it also shrinks the total evidence. Three years of matches counted as about 460, so the hierarchical prior pulled every team towards average.</li>
+    <li><b>Fix (one pre-declared change, not a parameter sweep):</b> keep the recency profile but rescale the weights to add up to the true number of matches.</li>
+    <li><b>Result:</b> significantly better than the first run, and level with the classical model. The classical model scored identically in both runs, which is the sanity check: maximum likelihood is unaffected by that rescaling, a Bayesian posterior is not.</li>
+  </ol>
+  <p>TabICL goes the other way: it is <i>more</i> decisive than the market, and that overconfidence is what costs it.</p>
+</section>
+
+<section>
+  <h2>Where Bayes earns its keep: promoted sides</h2>
+  <p>Both models share one effect for teams in their first season after promotion. Maximum likelihood barely uses it, because it can push that weakness into each team's own rating. The Bayesian model pools it across every promoted side, and finds a large and growing penalty.</p>
+  <div class="fig">
+    <h3>Promoted sides compared with their own later level</h3>
+    <p class="sub">Goals scored and conceded as a multiple of the same team's later level, estimated during each season. Bars are average 90% intervals. 1.0 = no difference.</p>
+    <div class="scroll"><svg class="ch" id="ch-prom" role="img" aria-label="Promoted side effect by season"></svg></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Goals scored</span><span><i style="background:var(--s2)"></i>Goals conceded</span></div>
+    <details class="tbl"><summary>Show as a table</summary><table id="t-prom"></table></details>
+  </div>
+  <p id="prom-text"></p>
+</section>
+
+<section>
+  <h2>Team strengths, with honest uncertainty</h2>
+  <p>A point estimate says Leeds and Everton are about equally bad going forward. The posterior says how sure we can be: promoted sides have one season of data, so their intervals are much wider.</p>
+  <div class="fig">
+    <h3>2025-26 team strength, posterior mean and 90% interval</h3>
+    <p class="sub">Log scale: +0.10 is about 10% more goals than an average team. Promoted sides include the promoted-season effect.</p>
+    <div class="toggle" role="group" aria-label="Choose measure"><button id="b-att" aria-pressed="true">Attack</button><button id="b-def" aria-pressed="false">Defence</button></div>
+    <div class="scroll"><svg class="ch" id="ch-teams" role="img" aria-label="Team strengths with intervals"></svg></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Established</span><span><i style="background:var(--s2)"></i>Promoted in 2025-26</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>What I take from it</h2>
+  <ol class="steps">
+    <li><b>The market is very hard to beat</b> with results-only models. Any edge has to come from information the market prices slowly, not from a cleverer fit of the same goals data.</li>
+    <li><b>Bayesian methods need their evidence counted honestly.</b> A weighting choice that is harmless for maximum likelihood quietly changed the Bayesian answer.</li>
+    <li><b>Where data is thin, pooling wins.</b> The promoted-side effect is the clearest gain, and it matches what happened on the pitch: every promoted side went straight back down in 2023-24 and 2024-25.</li>
+    <li><b>Foundation models are not magic on noisy, small tables.</b> Zero-tuning TabICL matched hand-built models but did not beat them, and was overconfident.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>Method notes</h2>
+  <ol class="steps" id="method"></ol>
+</section>
+
+<footer>Code: Python, NumPyro (NUTS), JAX, SciPy, TabICL v2, pandas. Data: football-data.co.uk results and closing odds.</footer>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+const D = {
+ "n": 1520,
+ "forecasters": [
+  {
+   "label": "Closing market",
+   "key": "mkt",
+   "log_loss": 0.9605,
+   "rps": 0.1948,
+   "diff": 0,
+   "lo": 0,
+   "hi": 0,
+   "sharp": 0.193
+  },
+  {
+   "label": "Classical (MLE)",
+   "key": "mle",
+   "log_loss": 0.985,
+   "rps": 0.2027,
+   "diff": 0.0245,
+   "lo": 0.0145,
+   "hi": 0.0342,
+   "sharp": 0.189
+  },
+  {
+   "label": "Bayesian, first run",
+   "key": "orig",
+   "log_loss": 0.9897,
+   "rps": 0.2042,
+   "diff": 0.0292,
+   "lo": 0.0184,
+   "hi": 0.0396,
+   "sharp": 0.151
+  },
+  {
+   "label": "Bayesian, fixed weights",
+   "key": "bayes",
+   "log_loss": 0.9833,
+   "rps": 0.2022,
+   "diff": 0.0228,
+   "lo": 0.0134,
+   "hi": 0.0319,
+   "sharp": 0.172
+  },
+  {
+   "label": "TabICL, models only",
+   "key": "tab",
+   "log_loss": 0.9899,
+   "rps": 0.2037,
+   "diff": 0.0294,
+   "lo": 0.0177,
+   "hi": 0.041,
+   "sharp": 0.199
+  },
+  {
+   "label": "TabICL, models + market",
+   "key": "tabm",
+   "log_loss": 0.9682,
+   "rps": 0.1967,
+   "diff": 0.0077,
+   "lo": 0.0016,
+   "hi": 0.0142,
+   "sharp": 0.219
+  }
+ ],
+ "bayes_fixed_minus_mle": [
+  -0.0017,
+  -0.0058,
+  0.0025
+ ],
+ "bayes_fixed_minus_orig": [
+  -0.0063,
+  -0.0107,
+  -0.0018
+ ],
+ "tab_minus_bayes": [
+  0.0066,
+  -0.0007,
+  0.0139
+ ],
+ "promoted_by_season": [
+  {
+   "season": "2021-22",
+   "scored": 0.986,
+   "scored_lo": 0.838,
+   "scored_hi": 1.161,
+   "conceded": 1.052,
+   "conceded_lo": 0.922,
+   "conceded_hi": 1.198
+  },
+  {
+   "season": "2022-23",
+   "scored": 0.869,
+   "scored_lo": 0.739,
+   "scored_hi": 1.025,
+   "conceded": 1.134,
+   "conceded_lo": 0.989,
+   "conceded_hi": 1.294
+  },
+  {
+   "season": "2023-24",
+   "scored": 0.854,
+   "scored_lo": 0.745,
+   "scored_hi": 0.981,
+   "conceded": 1.175,
+   "conceded_lo": 1.047,
+   "conceded_hi": 1.311
+  },
+  {
+   "season": "2024-25",
+   "scored": 0.751,
+   "scored_lo": 0.658,
+   "scored_hi": 0.858,
+   "conceded": 1.266,
+   "conceded_lo": 1.134,
+   "conceded_hi": 1.41
+  },
+  {
+   "season": "2025-26",
+   "scored": 0.714,
+   "scored_lo": 0.617,
+   "scored_hi": 0.83,
+   "conceded": 1.279,
+   "conceded_lo": 1.112,
+   "conceded_hi": 1.462
+  }
+ ],
+ "teams": [
+  {
+   "team": "Man City",
+   "attack": 0.27,
+   "attack_lo": 0.159,
+   "attack_hi": 0.386,
+   "defence": 0.251,
+   "defence_lo": 0.116,
+   "defence_hi": 0.397,
+   "mle_attack": 0.313,
+   "mle_defence": 0.307,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Liverpool",
+   "attack": 0.216,
+   "attack_lo": 0.1,
+   "attack_hi": 0.331,
+   "defence": 0.035,
+   "defence_lo": -0.087,
+   "defence_hi": 0.157,
+   "mle_attack": 0.253,
+   "mle_defence": 0.032,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Arsenal",
+   "attack": 0.203,
+   "attack_lo": 0.1,
+   "attack_hi": 0.31,
+   "defence": 0.418,
+   "defence_lo": 0.265,
+   "defence_hi": 0.585,
+   "mle_attack": 0.234,
+   "mle_defence": 0.544,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Newcastle",
+   "attack": 0.088,
+   "attack_lo": -0.024,
+   "attack_hi": 0.202,
+   "defence": -0.047,
+   "defence_lo": -0.177,
+   "defence_hi": 0.082,
+   "mle_attack": 0.107,
+   "mle_defence": -0.068,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Chelsea",
+   "attack": 0.065,
+   "attack_lo": -0.054,
+   "attack_hi": 0.184,
+   "defence": -0.006,
+   "defence_lo": -0.131,
+   "defence_hi": 0.119,
+   "mle_attack": 0.081,
+   "mle_defence": -0.018,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Man United",
+   "attack": 0.061,
+   "attack_lo": -0.054,
+   "attack_hi": 0.177,
+   "defence": -0.005,
+   "defence_lo": -0.126,
+   "defence_hi": 0.12,
+   "mle_attack": 0.072,
+   "mle_defence": -0.016,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Aston Villa",
+   "attack": 0.047,
+   "attack_lo": -0.068,
+   "attack_hi": 0.164,
+   "defence": -0.004,
+   "defence_lo": -0.131,
+   "defence_hi": 0.124,
+   "mle_attack": 0.06,
+   "mle_defence": -0.013,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Brentford",
+   "attack": 0.029,
+   "attack_lo": -0.086,
+   "attack_hi": 0.144,
+   "defence": -0.053,
+   "defence_lo": -0.168,
+   "defence_hi": 0.066,
+   "mle_attack": 0.039,
+   "mle_defence": -0.077,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Bournemouth",
+   "attack": 0.014,
+   "attack_lo": -0.102,
+   "attack_hi": 0.13,
+   "defence": -0.017,
+   "defence_lo": -0.138,
+   "defence_hi": 0.11,
+   "mle_attack": 0.022,
+   "mle_defence": -0.029,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Brighton",
+   "attack": -0.01,
+   "attack_lo": -0.14,
+   "attack_hi": 0.109,
+   "defence": -0.008,
+   "defence_lo": -0.127,
+   "defence_hi": 0.115,
+   "mle_attack": -0.009,
+   "mle_defence": -0.019,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Tottenham",
+   "attack": -0.029,
+   "attack_lo": -0.149,
+   "attack_hi": 0.09,
+   "defence": -0.144,
+   "defence_lo": -0.266,
+   "defence_hi": -0.021,
+   "mle_attack": -0.031,
+   "mle_defence": -0.179,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Nott'm Forest",
+   "attack": -0.061,
+   "attack_lo": -0.183,
+   "attack_hi": 0.059,
+   "defence": 0.009,
+   "defence_lo": -0.114,
+   "defence_hi": 0.135,
+   "mle_attack": -0.075,
+   "mle_defence": -0.0,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Fulham",
+   "attack": -0.107,
+   "attack_lo": -0.233,
+   "attack_hi": 0.014,
+   "defence": -0.013,
+   "defence_lo": -0.137,
+   "defence_hi": 0.112,
+   "mle_attack": -0.131,
+   "mle_defence": -0.025,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "West Ham",
+   "attack": -0.119,
+   "attack_lo": -0.24,
+   "attack_hi": 0.003,
+   "defence": -0.18,
+   "defence_lo": -0.305,
+   "defence_hi": -0.057,
+   "mle_attack": -0.145,
+   "mle_defence": -0.222,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Crystal Palace",
+   "attack": -0.139,
+   "attack_lo": -0.266,
+   "attack_hi": -0.015,
+   "defence": -0.021,
+   "defence_lo": -0.142,
+   "defence_hi": 0.095,
+   "mle_attack": -0.171,
+   "mle_defence": -0.035,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Leeds",
+   "attack": -0.182,
+   "attack_lo": -0.36,
+   "attack_hi": -0.004,
+   "defence": -0.113,
+   "defence_lo": -0.27,
+   "defence_hi": 0.05,
+   "mle_attack": -0.096,
+   "mle_defence": -0.053,
+   "matches_in_window": 38,
+   "promoted_2025_26": true
+  },
+  {
+   "team": "Everton",
+   "attack": -0.183,
+   "attack_lo": -0.316,
+   "attack_hi": -0.055,
+   "defence": 0.061,
+   "defence_lo": -0.068,
+   "defence_hi": 0.19,
+   "mle_attack": -0.226,
+   "mle_defence": 0.065,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Sunderland",
+   "attack": -0.295,
+   "attack_lo": -0.467,
+   "attack_hi": -0.122,
+   "defence": -0.038,
+   "defence_lo": -0.195,
+   "defence_hi": 0.135,
+   "mle_attack": -0.255,
+   "mle_defence": 0.059,
+   "matches_in_window": 38,
+   "promoted_2025_26": true
+  },
+  {
+   "team": "Wolves",
+   "attack": -0.306,
+   "attack_lo": -0.452,
+   "attack_hi": -0.163,
+   "defence": -0.208,
+   "defence_lo": -0.321,
+   "defence_hi": -0.098,
+   "mle_attack": -0.391,
+   "mle_defence": -0.249,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Burnley",
+   "attack": -0.362,
+   "attack_lo": -0.532,
+   "attack_hi": -0.2,
+   "defence": -0.358,
+   "defence_lo": -0.489,
+   "defence_hi": -0.224,
+   "mle_attack": -0.354,
+   "mle_defence": -0.368,
+   "matches_in_window": 76,
+   "promoted_2025_26": true
+  }
+ ],
+ "showcase": {
+  "home": {
+   "mean": 0.17064333788681213,
+   "lo": 0.11332462616473592,
+   "hi": 0.22867962025550637
+  },
+  "rho": {
+   "mean": -0.09116783503162719,
+   "lo": -0.15522241330010633,
+   "hi": -0.026578996198125194
+  },
+  "prom_att": {
+   "mean": -0.35797831872626457,
+   "lo": -0.5205439810476276,
+   "hi": -0.20367886270353727
+  },
+  "prom_dfn": {
+   "mean": 0.3360819397699003,
+   "lo": 0.1916535049474539,
+   "hi": 0.48996841137297487
+  },
+  "sigma_att": {
+   "mean": 0.17502761892350943,
+   "lo": 0.11886619788704275,
+   "hi": 0.2459682691450896
+  },
+  "sigma_dfn": {
+   "mean": 0.18622925539415713,
+   "lo": 0.13223166769008593,
+   "hi": 0.2503699174011432
+  },
+  "mu": {
+   "mean": 0.24491852417376805,
+   "lo": 0.1717794499037688,
+   "hi": 0.3169349649917757
+  },
+  "promoted_goals_scored_multiplier": {
+   "mean": 0.7023665114174783,
+   "lo": 0.5941972300202742,
+   "hi": 0.8157243163113922
+  },
+  "promoted_goals_conceded_multiplier": {
+   "mean": 1.4054743360578137,
+   "lo": 1.2112507542832918,
+   "hi": 1.6322646646141439
+  },
+  "home_goals_multiplier": {
+   "mean": 1.1867908587530351,
+   "lo": 1.1199954540304327,
+   "hi": 1.2569392766381555
+  },
+  "divergences": 0
+ },
+ "convergence": {
+  "fits": 108,
+  "max_rhat": 1.035,
+  "min_ess": 116,
+  "divergences": 0
+ }
+};
+const $ = s => document.querySelector(s);
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const tip = $("#tip");
+function bindTips(svg){
+  svg.querySelectorAll("[data-tip]").forEach(el=>{
+    el.addEventListener("pointerenter",()=>{tip.innerHTML=el.dataset.tip;tip.style.opacity=1});
+    el.addEventListener("pointermove",e=>{tip.style.left=Math.min(e.clientX+14,innerWidth-270)+"px";tip.style.top=(e.clientY+14)+"px"});
+    el.addEventListener("pointerleave",()=>{tip.style.opacity=0});
+  });
+}
+const f3 = x => (x>=0?"+":"")+x.toFixed(3);
+const pct = x => Math.round((x-1)*100);
+
+/* tiles */
+const by = k => D.forecasters.find(f=>f.key===k);
+const sc = D.showcase;
+$("#tiles").innerHTML = [
+  [D.n.toLocaleString(),"matches forecast out of sample"],
+  [D.convergence.fits,"MCMC fits, all converged"],
+  [by("mkt").log_loss.toFixed(3),"market log loss, the best"],
+  [`${pct(sc.promoted_goals_scored_multiplier.mean)}%`,"goals scored by promoted sides vs later level"]
+].map(([b,s])=>`<div class="tile"><b>${b}</b><span>${s}</span></div>`).join("");
+
+/* colours per forecaster: identity follows the entity */
+const COL = {mkt:"--bench", mle:"--s1", orig:"--s2", bayes:"--s2", tab:"--s3", tabm:"--s3"};
+const HOLLOW = {orig:true, tab:true};
+
+/* chart 1: gap to market */
+function chartGap(){
+  const rows = D.forecasters.filter(f=>f.key!=="mkt");
+  const W=720, rowH=46, top=34, left=230, right=30, H=top+rows.length*rowH+30;
+  const xmax=0.045, X=v=>left+(v/xmax)*(W-left-right);
+  let g=`<line x1="${X(0)}" y1="${top-14}" x2="${X(0)}" y2="${H-26}" stroke="var(--ink)" stroke-width="2"/>`;
+  for(let t=0;t<=0.04001;t+=0.01){g+=`<line x1="${X(t)}" y1="${top-8}" x2="${X(t)}" y2="${H-26}" stroke="var(--grid)"/><text class="num muted" x="${X(t)}" y="${H-8}" text-anchor="middle">${t===0?"market":"+"+t.toFixed(2)}</text>`}
+  rows.forEach((r,i)=>{
+    const y=top+i*rowH+rowH/2, c=`var(${COL[r.key]})`;
+    g+=`<text x="${left-14}" y="${y+4}" text-anchor="end">${r.label}</text>`;
+    g+=`<line x1="${X(r.lo)}" y1="${y}" x2="${X(r.hi)}" y2="${y}" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>`;
+    g+=`<circle cx="${X(r.diff)}" cy="${y}" r="7" fill="${HOLLOW[r.key]?"var(--surface)":c}" stroke="${c}" stroke-width="2.5"/>`;
+    g+=`<rect x="${left}" y="${y-rowH/2}" width="${W-left}" height="${rowH}" fill="transparent" data-tip="<b>${r.label}</b><br>Log loss ${r.log_loss.toFixed(4)}<br>Gap to market ${f3(r.diff)} (95% ${f3(r.lo)} to ${f3(r.hi)})"/>`;
+  });
+  const s=$("#ch-gap"); s.setAttribute("viewBox",`0 0 ${W} ${H}`); s.innerHTML=g; bindTips(s);
+  $("#t-gap").innerHTML="<tr><th>Forecaster</th><th class=n>Log loss</th><th class=n>RPS</th><th class=n>Gap</th><th class=n>95% interval</th></tr>"+
+    D.forecasters.map(r=>`<tr><td>${r.label}</td><td class=n>${r.log_loss.toFixed(4)}</td><td class=n>${r.rps.toFixed(4)}</td><td class=n>${r.key==="mkt"?"":f3(r.diff)}</td><td class=n>${r.key==="mkt"?"":f3(r.lo)+" to "+f3(r.hi)}</td></tr>`).join("");
+}
+
+/* chart 2: sharpness */
+function chartSharp(){
+  const rows = D.forecasters;
+  const W=720, rowH=38, top=24, left=230, right=60, H=top+rows.length*rowH+28;
+  const xmax=0.24, X=v=>left+(v/xmax)*(W-left-right), ref=by("mkt").sharp;
+  let g="";
+  for(let t=0;t<=0.2001;t+=0.05) g+=`<line x1="${X(t)}" y1="${top-6}" x2="${X(t)}" y2="${H-24}" stroke="var(--grid)"/><text class="num muted" x="${X(t)}" y="${H-6}" text-anchor="middle">${t.toFixed(2)}</text>`;
+  rows.forEach((r,i)=>{
+    const y=top+i*rowH, c=`var(${COL[r.key]})`, bw=X(r.sharp)-left;
+    g+=`<text x="${left-14}" y="${y+rowH/2+4}" text-anchor="end">${r.label}</text>`;
+    g+=`<rect x="${left}" y="${y+8}" width="${bw}" height="${rowH-16}" rx="4" fill="${c}" ${HOLLOW[r.key]?`fill-opacity=".35" stroke="${c}" stroke-width="2"`:""} data-tip="<b>${r.label}</b><br>Spread ${r.sharp.toFixed(3)} (market ${ref.toFixed(3)})"/>`;
+    g+=`<text class="num" x="${left+bw+8}" y="${y+rowH/2+4}">${r.sharp.toFixed(3)}</text>`;
+  });
+  g+=`<line x1="${X(ref)}" y1="${top-10}" x2="${X(ref)}" y2="${H-24}" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 4"/><text x="${X(ref)}" y="${top-12}" text-anchor="middle" class="num">market</text>`;
+  const s=$("#ch-sharp"); s.setAttribute("viewBox",`0 0 ${W} ${H}`); s.innerHTML=g; bindTips(s);
+}
+
+/* chart 3: promoted effect by season */
+function chartProm(){
+  const rows=D.promoted_by_season, W=720, H=300, left=60, right=20, top=20, bottom=40;
+  const ymin=0.55, ymax=1.55, Y=v=>top+(ymax-v)/(ymax-ymin)*(H-top-bottom);
+  const gw=(W-left-right)/rows.length;
+  let g="";
+  [0.6,0.8,1.0,1.2,1.4].forEach(v=>{g+=`<line x1="${left}" y1="${Y(v)}" x2="${W-right}" y2="${Y(v)}" stroke="${v===1?"var(--ink)":"var(--grid)"}" stroke-width="${v===1?2:1}"/><text class="num muted" x="${left-8}" y="${Y(v)+4}" text-anchor="end">${v.toFixed(1)}×</text>`});
+  rows.forEach((r,i)=>{
+    const cx=left+gw*i+gw/2;
+    [["scored","--s1",-14],["conceded","--s2",14]].forEach(([k,c,dx])=>{
+      const x=cx+dx;
+      g+=`<line x1="${x}" y1="${Y(r[k+"_lo"])}" x2="${x}" y2="${Y(r[k+"_hi"])}" stroke="var(${c})" stroke-width="2.5" stroke-linecap="round"/>`;
+      g+=`<circle cx="${x}" cy="${Y(r[k])}" r="7" fill="var(${c})" stroke="var(--surface)" stroke-width="2"/>`;
+      g+=`<rect x="${x-12}" y="${top}" width="24" height="${H-top-bottom}" fill="transparent" data-tip="<b>${r.season}</b><br>Goals ${k}: ${r[k].toFixed(2)}× (${r[k+"_lo"].toFixed(2)} to ${r[k+"_hi"].toFixed(2)})"/>`;
+    });
+    g+=`<text x="${cx}" y="${H-14}" text-anchor="middle">${r.season}</text>`;
+  });
+  const s=$("#ch-prom"); s.setAttribute("viewBox",`0 0 ${W} ${H}`); s.innerHTML=g; bindTips(s);
+  $("#t-prom").innerHTML="<tr><th>Season</th><th class=n>Scored</th><th class=n>90%</th><th class=n>Conceded</th><th class=n>90%</th></tr>"+
+    rows.map(r=>`<tr><td>${r.season}</td><td class=n>${r.scored.toFixed(2)}×</td><td class=n>${r.scored_lo.toFixed(2)} to ${r.scored_hi.toFixed(2)}</td><td class=n>${r.conceded.toFixed(2)}×</td><td class=n>${r.conceded_lo.toFixed(2)} to ${r.conceded_hi.toFixed(2)}</td></tr>`).join("");
+  const a=sc.promoted_goals_scored_multiplier, c=sc.promoted_goals_conceded_multiplier;
+  $("#prom-text").textContent=`Fitted on everything up to the end of 2025-26, promoted sides score ${Math.abs(pct(a.mean))}% fewer goals (90% interval ${Math.abs(pct(a.hi))}% to ${Math.abs(pct(a.lo))}%) and concede ${pct(c.mean)}% more (${pct(c.lo)}% to ${pct(c.hi)}%) than they do once established. The classical fit estimates almost no effect, because without pooling it hides the gap inside each team's own rating.`;
+}
+
+/* chart 4: team strengths */
+let measure="attack";
+function chartTeams(){
+  const rows=[...D.teams].sort((a,b)=>b[measure]-a[measure]);
+  const W=720, rowH=24, top=20, left=150, right=30, H=top+rows.length*rowH+30;
+  const lo=-0.6, hi=0.65, X=v=>left+(v-lo)/(hi-lo)*(W-left-right);
+  let g="";
+  [-0.4,-0.2,0,0.2,0.4,0.6].forEach(v=>{g+=`<line x1="${X(v)}" y1="${top-6}" x2="${X(v)}" y2="${H-24}" stroke="${v===0?"var(--ink)":"var(--grid)"}" stroke-width="${v===0?1.5:1}"/><text class="num muted" x="${X(v)}" y="${H-6}" text-anchor="middle">${v>0?"+":""}${v.toFixed(1)}</text>`});
+  rows.forEach((r,i)=>{
+    const y=top+i*rowH+rowH/2, c=r.promoted_2025_26?"var(--s2)":"var(--s1)";
+    const m=r[measure], l=r[measure+"_lo"], h=r[measure+"_hi"];
+    g+=`<text x="${left-12}" y="${y+4}" text-anchor="end">${r.team}</text>`;
+    g+=`<line x1="${X(l)}" y1="${y}" x2="${X(h)}" y2="${y}" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>`;
+    g+=`<circle cx="${X(m)}" cy="${y}" r="6" fill="${c}" stroke="var(--surface)" stroke-width="2"/>`;
+    g+=`<rect x="${left}" y="${y-rowH/2}" width="${W-left}" height="${rowH}" fill="transparent" data-tip="<b>${r.team}</b>${r.promoted_2025_26?" (promoted)":""}<br>${measure}: ${f3(m)} (90% ${f3(l)} to ${f3(h)})<br>Classical estimate: ${f3(r["mle_"+measure])}<br>${r.matches_in_window} matches in the window"/>`;
+  });
+  const s=$("#ch-teams"); s.setAttribute("viewBox",`0 0 ${W} ${H}`); s.innerHTML=g; bindTips(s);
+}
+$("#b-att").onclick=()=>{measure="attack";$("#b-att").setAttribute("aria-pressed","true");$("#b-def").setAttribute("aria-pressed","false");chartTeams()};
+$("#b-def").onclick=()=>{measure="defence";$("#b-def").setAttribute("aria-pressed","true");$("#b-att").setAttribute("aria-pressed","false");chartTeams()};
+
+/* method notes */
+const cv=D.convergence;
+$("#method").innerHTML=[
+  "<b>Data:</b> 3,800 Premier League matches (2016-17 to 2025-26) with closing odds; every file checked to be the Premier League before use. Pinnacle closing odds throughout, except the second half of 2025-26, where the market-average closing price is used.",
+  "<b>Validation:</b> walk-forward, refit every 28 days on the previous three years with an exponential decay (half-life about a year). 2021-22 forecasts feed TabICL's history, so all comparisons use 2022-23 to 2025-26.",
+  `<b>Sampling:</b> NUTS, 2 chains × 600 draws per fit. ${cv.fits} fits, maximum R-hat ${cv.max_rhat}, ${cv.divergences} divergences.`,
+  "<b>Uncertainty:</b> differences between forecasters use a paired bootstrap over matches (5,000 resamples).",
+  "<b>TabICL:</b> v2 classifier, default settings, CPU; trained only on earlier matches that had already been forecast out of sample."
+].map(x=>`<li>${x}</li>`).join("");
+
+chartGap(); chartSharp(); chartProm(); chartTeams();
+</script>

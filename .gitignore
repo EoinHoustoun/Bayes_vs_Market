@@ -1,0 +1,10 @@
+.venv/
+.venv-tabicl/
+__pycache__/
+.pytest_cache/
+.playwright-mcp/
+data/
+*.pkl
+*.log
+writeup/preview.html
+.DS_Store

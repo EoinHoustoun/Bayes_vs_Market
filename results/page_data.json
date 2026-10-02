@@ -1,0 +1,448 @@
+{
+ "n": 1520,
+ "forecasters": [
+  {
+   "label": "Closing market",
+   "key": "mkt",
+   "log_loss": 0.9605,
+   "rps": 0.1948,
+   "diff": 0,
+   "lo": 0,
+   "hi": 0,
+   "sharp": 0.193
+  },
+  {
+   "label": "Classical (MLE)",
+   "key": "mle",
+   "log_loss": 0.985,
+   "rps": 0.2027,
+   "diff": 0.0245,
+   "lo": 0.0145,
+   "hi": 0.0342,
+   "sharp": 0.189
+  },
+  {
+   "label": "Bayesian, first run",
+   "key": "orig",
+   "log_loss": 0.9897,
+   "rps": 0.2042,
+   "diff": 0.0292,
+   "lo": 0.0184,
+   "hi": 0.0396,
+   "sharp": 0.151
+  },
+  {
+   "label": "Bayesian, fixed weights",
+   "key": "bayes",
+   "log_loss": 0.9833,
+   "rps": 0.2022,
+   "diff": 0.0228,
+   "lo": 0.0134,
+   "hi": 0.0319,
+   "sharp": 0.172
+  },
+  {
+   "label": "TabICL, models only",
+   "key": "tab",
+   "log_loss": 0.9899,
+   "rps": 0.2037,
+   "diff": 0.0294,
+   "lo": 0.0177,
+   "hi": 0.041,
+   "sharp": 0.199
+  },
+  {
+   "label": "TabICL, models + market",
+   "key": "tabm",
+   "log_loss": 0.9682,
+   "rps": 0.1967,
+   "diff": 0.0077,
+   "lo": 0.0016,
+   "hi": 0.0142,
+   "sharp": 0.219
+  }
+ ],
+ "bayes_fixed_minus_mle": [
+  -0.0017,
+  -0.0058,
+  0.0025
+ ],
+ "bayes_fixed_minus_orig": [
+  -0.0063,
+  -0.0107,
+  -0.0018
+ ],
+ "tab_minus_bayes": [
+  0.0066,
+  -0.0007,
+  0.0139
+ ],
+ "promoted_by_season": [
+  {
+   "season": "2021-22",
+   "scored": 0.986,
+   "scored_lo": 0.838,
+   "scored_hi": 1.161,
+   "conceded": 1.052,
+   "conceded_lo": 0.922,
+   "conceded_hi": 1.198
+  },
+  {
+   "season": "2022-23",
+   "scored": 0.869,
+   "scored_lo": 0.739,
+   "scored_hi": 1.025,
+   "conceded": 1.134,
+   "conceded_lo": 0.989,
+   "conceded_hi": 1.294
+  },
+  {
+   "season": "2023-24",
+   "scored": 0.854,
+   "scored_lo": 0.745,
+   "scored_hi": 0.981,
+   "conceded": 1.175,
+   "conceded_lo": 1.047,
+   "conceded_hi": 1.311
+  },
+  {
+   "season": "2024-25",
+   "scored": 0.751,
+   "scored_lo": 0.658,
+   "scored_hi": 0.858,
+   "conceded": 1.266,
+   "conceded_lo": 1.134,
+   "conceded_hi": 1.41
+  },
+  {
+   "season": "2025-26",
+   "scored": 0.714,
+   "scored_lo": 0.617,
+   "scored_hi": 0.83,
+   "conceded": 1.279,
+   "conceded_lo": 1.112,
+   "conceded_hi": 1.462
+  }
+ ],
+ "teams": [
+  {
+   "team": "Man City",
+   "attack": 0.27,
+   "attack_lo": 0.159,
+   "attack_hi": 0.386,
+   "defence": 0.251,
+   "defence_lo": 0.116,
+   "defence_hi": 0.397,
+   "mle_attack": 0.313,
+   "mle_defence": 0.307,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Liverpool",
+   "attack": 0.216,
+   "attack_lo": 0.1,
+   "attack_hi": 0.331,
+   "defence": 0.035,
+   "defence_lo": -0.087,
+   "defence_hi": 0.157,
+   "mle_attack": 0.253,
+   "mle_defence": 0.032,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Arsenal",
+   "attack": 0.203,
+   "attack_lo": 0.1,
+   "attack_hi": 0.31,
+   "defence": 0.418,
+   "defence_lo": 0.265,
+   "defence_hi": 0.585,
+   "mle_attack": 0.234,
+   "mle_defence": 0.544,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Newcastle",
+   "attack": 0.088,
+   "attack_lo": -0.024,
+   "attack_hi": 0.202,
+   "defence": -0.047,
+   "defence_lo": -0.177,
+   "defence_hi": 0.082,
+   "mle_attack": 0.107,
+   "mle_defence": -0.068,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Chelsea",
+   "attack": 0.065,
+   "attack_lo": -0.054,
+   "attack_hi": 0.184,
+   "defence": -0.006,
+   "defence_lo": -0.131,
+   "defence_hi": 0.119,
+   "mle_attack": 0.081,
+   "mle_defence": -0.018,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Man United",
+   "attack": 0.061,
+   "attack_lo": -0.054,
+   "attack_hi": 0.177,
+   "defence": -0.005,
+   "defence_lo": -0.126,
+   "defence_hi": 0.12,
+   "mle_attack": 0.072,
+   "mle_defence": -0.016,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Aston Villa",
+   "attack": 0.047,
+   "attack_lo": -0.068,
+   "attack_hi": 0.164,
+   "defence": -0.004,
+   "defence_lo": -0.131,
+   "defence_hi": 0.124,
+   "mle_attack": 0.06,
+   "mle_defence": -0.013,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Brentford",
+   "attack": 0.029,
+   "attack_lo": -0.086,
+   "attack_hi": 0.144,
+   "defence": -0.053,
+   "defence_lo": -0.168,
+   "defence_hi": 0.066,
+   "mle_attack": 0.039,
+   "mle_defence": -0.077,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Bournemouth",
+   "attack": 0.014,
+   "attack_lo": -0.102,
+   "attack_hi": 0.13,
+   "defence": -0.017,
+   "defence_lo": -0.138,
+   "defence_hi": 0.11,
+   "mle_attack": 0.022,
+   "mle_defence": -0.029,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Brighton",
+   "attack": -0.01,
+   "attack_lo": -0.14,
+   "attack_hi": 0.109,
+   "defence": -0.008,
+   "defence_lo": -0.127,
+   "defence_hi": 0.115,
+   "mle_attack": -0.009,
+   "mle_defence": -0.019,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Tottenham",
+   "attack": -0.029,
+   "attack_lo": -0.149,
+   "attack_hi": 0.09,
+   "defence": -0.144,
+   "defence_lo": -0.266,
+   "defence_hi": -0.021,
+   "mle_attack": -0.031,
+   "mle_defence": -0.179,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Nott'm Forest",
+   "attack": -0.061,
+   "attack_lo": -0.183,
+   "attack_hi": 0.059,
+   "defence": 0.009,
+   "defence_lo": -0.114,
+   "defence_hi": 0.135,
+   "mle_attack": -0.075,
+   "mle_defence": -0.0,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Fulham",
+   "attack": -0.107,
+   "attack_lo": -0.233,
+   "attack_hi": 0.014,
+   "defence": -0.013,
+   "defence_lo": -0.137,
+   "defence_hi": 0.112,
+   "mle_attack": -0.131,
+   "mle_defence": -0.025,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "West Ham",
+   "attack": -0.119,
+   "attack_lo": -0.24,
+   "attack_hi": 0.003,
+   "defence": -0.18,
+   "defence_lo": -0.305,
+   "defence_hi": -0.057,
+   "mle_attack": -0.145,
+   "mle_defence": -0.222,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Crystal Palace",
+   "attack": -0.139,
+   "attack_lo": -0.266,
+   "attack_hi": -0.015,
+   "defence": -0.021,
+   "defence_lo": -0.142,
+   "defence_hi": 0.095,
+   "mle_attack": -0.171,
+   "mle_defence": -0.035,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Leeds",
+   "attack": -0.182,
+   "attack_lo": -0.36,
+   "attack_hi": -0.004,
+   "defence": -0.113,
+   "defence_lo": -0.27,
+   "defence_hi": 0.05,
+   "mle_attack": -0.096,
+   "mle_defence": -0.053,
+   "matches_in_window": 38,
+   "promoted_2025_26": true
+  },
+  {
+   "team": "Everton",
+   "attack": -0.183,
+   "attack_lo": -0.316,
+   "attack_hi": -0.055,
+   "defence": 0.061,
+   "defence_lo": -0.068,
+   "defence_hi": 0.19,
+   "mle_attack": -0.226,
+   "mle_defence": 0.065,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Sunderland",
+   "attack": -0.295,
+   "attack_lo": -0.467,
+   "attack_hi": -0.122,
+   "defence": -0.038,
+   "defence_lo": -0.195,
+   "defence_hi": 0.135,
+   "mle_attack": -0.255,
+   "mle_defence": 0.059,
+   "matches_in_window": 38,
+   "promoted_2025_26": true
+  },
+  {
+   "team": "Wolves",
+   "attack": -0.306,
+   "attack_lo": -0.452,
+   "attack_hi": -0.163,
+   "defence": -0.208,
+   "defence_lo": -0.321,
+   "defence_hi": -0.098,
+   "mle_attack": -0.391,
+   "mle_defence": -0.249,
+   "matches_in_window": 114,
+   "promoted_2025_26": false
+  },
+  {
+   "team": "Burnley",
+   "attack": -0.362,
+   "attack_lo": -0.532,
+   "attack_hi": -0.2,
+   "defence": -0.358,
+   "defence_lo": -0.489,
+   "defence_hi": -0.224,
+   "mle_attack": -0.354,
+   "mle_defence": -0.368,
+   "matches_in_window": 76,
+   "promoted_2025_26": true
+  }
+ ],
+ "showcase": {
+  "home": {
+   "mean": 0.17064333788681213,
+   "lo": 0.11332462616473592,
+   "hi": 0.22867962025550637
+  },
+  "rho": {
+   "mean": -0.09116783503162719,
+   "lo": -0.15522241330010633,
+   "hi": -0.026578996198125194
+  },
+  "prom_att": {
+   "mean": -0.35797831872626457,
+   "lo": -0.5205439810476276,
+   "hi": -0.20367886270353727
+  },
+  "prom_dfn": {
+   "mean": 0.3360819397699003,
+   "lo": 0.1916535049474539,
+   "hi": 0.48996841137297487
+  },
+  "sigma_att": {
+   "mean": 0.17502761892350943,
+   "lo": 0.11886619788704275,
+   "hi": 0.2459682691450896
+  },
+  "sigma_dfn": {
+   "mean": 0.18622925539415713,
+   "lo": 0.13223166769008593,
+   "hi": 0.2503699174011432
+  },
+  "mu": {
+   "mean": 0.24491852417376805,
+   "lo": 0.1717794499037688,
+   "hi": 0.3169349649917757
+  },
+  "promoted_goals_scored_multiplier": {
+   "mean": 0.7023665114174783,
+   "lo": 0.5941972300202742,
+   "hi": 0.8157243163113922
+  },
+  "promoted_goals_conceded_multiplier": {
+   "mean": 1.4054743360578137,
+   "lo": 1.2112507542832918,
+   "hi": 1.6322646646141439
+  },
+  "home_goals_multiplier": {
+   "mean": 1.1867908587530351,
+   "lo": 1.1199954540304327,
+   "hi": 1.2569392766381555
+  },
+  "divergences": 0
+ },
+ "convergence": {
+  "fits": 108,
+  "max_rhat": 1.035,
+  "min_ess": 116,
+  "divergences": 0
+ }
+}
